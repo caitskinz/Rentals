@@ -1,0 +1,1882 @@
+<!doctype html>
+<html lang="en-NZ">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Flat Hunt</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1E5B73" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Flat Hunt" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #e7eeed;
+        --surface: #fbfdfc;
+        --ink: #4a288d;
+        --muted: #546770;
+        --line: #c5d1d0;
+        --harbour: #1e5b73;
+        --on-harbour: #ffffff;
+        --vote: #c3343c;
+        --on-vote: #ffffff;
+        --gold: #c9932a;
+        /* weatherboard paint swatches, one per house */
+        --p0: #8fa889;
+        --p1: #d9a93f;
+        --p2: #9fc6c4;
+        --p3: #cb7c62;
+        --p4: #a99bc4;
+        --p5: #7e9db5;
+        --font:
+          "Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system,
+          "Segoe UI", Roboto, sans-serif;
+        color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font);
+        font-size: 1rem;
+        line-height: 1.45;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .bg-img {
+        max-width: 30%;
+        position: absolute;
+        z-index: -1;
+      }
+      .dipsy {
+        bottom: 0;
+        left: -30px;
+      }
+      .laa-laa {
+        bottom: 20px;
+        right: -20px;
+        transform: rotate(-20deg)
+      }
+      .tinky-winky {
+        top: 130px;
+        left: -30px;
+        transform: rotate(20deg);
+      }
+      .po {
+        top: 130px;
+        right: -50px;
+        transform: rotate(-20deg);
+
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      :focus-visible {
+        outline: 3px solid var(--harbour);
+        outline-offset: 2px;
+      }
+      a {
+        color: var(--harbour);
+        font-weight: 600;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+
+      /* ---------- header ---------- */
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--bg);
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: calc(env(safe-area-inset-top, 0px) + 18px) 18px 14px;
+      }
+      .top h1 {
+        margin: 0;
+        font-size: clamp(2.1rem, 8vw, 2.9rem);
+        font-weight: 800;
+        letter-spacing: -0.035em;
+        line-height: 0.95;
+        font-variation-settings: "opsz" 96;
+      }
+      .me {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 5px 14px 5px 5px;
+        font-weight: 600;
+      }
+      .dot {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: inline-grid;
+        place-items: center;
+        font-size: 0.78rem;
+        font-weight: 600;
+        border: 1.5px solid var(--line);
+        color: var(--muted);
+        background: var(--surface);
+      }
+      .me .dot {
+        background: var(--harbour);
+        border-color: var(--harbour);
+        color: var(--on-harbour);
+      }
+      .offline {
+        max-width: 1100px;
+        margin: 0 auto 12px;
+        padding: 0 18px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      /* ---------- toolbar ---------- */
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 18px 18px;
+      }
+      .toolbar::-webkit-scrollbar {
+        display: none;
+      }
+      .chip {
+        flex-shrink: 0;
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 13px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+      .chip[aria-pressed="true"] {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--bg);
+        font-weight: 600;
+      }
+      .sort {
+        flex-shrink: 0;
+        margin-left: auto;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.9rem;
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 18px calc(160px + env(safe-area-inset-bottom, 0px));
+      }
+      .lede {
+        margin: 0 0 18px;
+        color: var(--muted);
+        max-width: 60ch;
+      }
+      .empty {
+        padding: 40px 0;
+        max-width: 36ch;
+        font-size: 1.05rem;
+        color: var(--muted);
+      }
+
+      /* ---------- house cards ---------- */
+      .grid {
+        display: grid;
+        gap: 30px 20px;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+      }
+      .house {
+        display: flex;
+        flex-direction: column;
+      }
+      .house-open {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: 0;
+        padding: 0;
+      }
+      .roof {
+        height: 54px;
+        background: var(--paint);
+        clip-path: polygon(0 100%, 0 56%, 50% 0, 100% 56%, 100% 100%);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 6px;
+        color: #1d2b33;
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+      .house-body {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-top: 0;
+        border-bottom: 0;
+        box-shadow: inset 0 6px 0 var(--paint);
+        padding: 20px 16px 12px;
+      }
+      .house-body h3 {
+        margin: 0 0 4px;
+        font-size: 1.22rem;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 14px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.93rem;
+      }
+      .status {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 10px;
+        margin: 12px 0 0;
+        font-size: 0.9rem;
+      }
+      .pill {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 1px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .pill[data-status="viewing booked"] {
+        border-color: var(--harbour);
+        color: var(--harbour);
+      }
+      .pill[data-status="applied"] {
+        background: var(--harbour);
+        border-color: var(--harbour);
+        color: var(--on-harbour);
+      }
+      .pill[data-status="rejected"] {
+        color: var(--muted);
+        text-decoration: line-through;
+      }
+      .house-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-top: 1px dashed var(--line);
+        border-radius: 0 0 6px 6px;
+        padding: 10px 12px 12px 16px;
+        font-size: 0.93rem;
+      }
+      .star {
+        color: var(--gold);
+      }
+
+      .voting {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .voters {
+        display: inline-flex;
+      }
+      .voters .dot {
+        width: 24px;
+        height: 24px;
+        font-size: 0.72rem;
+        margin-left: -6px;
+      }
+      .voters .dot:first-child {
+        margin-left: 0;
+      }
+      .voters .dot.on {
+        background: var(--vote);
+        border-color: var(--vote);
+        color: var(--on-vote);
+      }
+      .vote {
+        background: transparent;
+        border: 1.5px solid var(--vote);
+        color: var(--vote);
+        border-radius: 999px;
+        padding: 5px 13px;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .vote[aria-pressed="true"] {
+        background: var(--vote);
+        color: var(--on-vote);
+      }
+
+      /* ---------- viewings ---------- */
+      .day {
+        margin: 0 0 26px;
+      }
+      .day h2 {
+        margin: 0 0 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .viewing {
+        display: grid;
+        grid-template-columns: 5.2rem 1fr;
+        gap: 2px 14px;
+        align-items: baseline;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-left: 6px solid var(--paint);
+        border-radius: 6px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+      }
+      .viewing .time {
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+      .viewing .addr {
+        font-weight: 600;
+        font-size: 1.05rem;
+        background: none;
+        border: 0;
+        padding: 0;
+        text-align: left;
+      }
+      .viewing .sub {
+        grid-column: 2;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .viewing .links {
+        grid-column: 2;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+        font-size: 0.9rem;
+        margin-top: 4px;
+      }
+      .viewing .time.small {
+        font-size: 1rem;
+      }
+      .past .viewing {
+        opacity: 0.75;
+      }
+
+      /* ---------- compare ---------- */
+      .table-wrap {
+        overflow-x: auto;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 760px;
+        font-size: 0.93rem;
+      }
+      th,
+      td {
+        padding: 10px 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+      }
+      thead th {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      tbody th {
+        position: sticky;
+        left: 0;
+        background: var(--surface);
+        font-weight: 400;
+      }
+      tbody tr:last-child > * {
+        border-bottom: 0;
+      }
+      td.best {
+        font-weight: 800;
+        color: var(--harbour);
+      }
+      .place-btn {
+        background: none;
+        border: 0;
+        border-left: 5px solid var(--paint);
+        padding: 2px 0 2px 10px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      /* ---------- floating action + tabs ---------- */
+      .fab {
+        position: fixed;
+        z-index: 20;
+        right: 18px;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 78px);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--harbour);
+        color: var(--on-harbour);
+        border: 0;
+        border-radius: 999px;
+        padding: 14px 20px 14px 16px;
+        font-weight: 600;
+        box-shadow: 0 6px 18px rgba(16, 40, 52, 0.28);
+      }
+      .tabs {
+        position: fixed;
+        z-index: 20;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        background: var(--surface);
+        border-top: 1px solid var(--line);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .tabs button {
+        position: relative;
+        background: none;
+        border: 0;
+        padding: 15px 8px 17px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .tabs button[aria-current="page"] {
+        color: var(--ink);
+      }
+      .tabs button[aria-current="page"]::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 28%;
+        right: 28%;
+        height: 3px;
+        background: var(--harbour);
+        border-radius: 0 0 3px 3px;
+      }
+
+      /* ---------- dialogs ---------- */
+      dialog.sheet {
+        border: 0;
+        padding: 0;
+        width: 100%;
+        max-width: 620px;
+        max-height: min(92vh, 900px);
+        margin: auto auto 0;
+        border-radius: 16px 16px 0 0;
+        background: var(--surface);
+        color: var(--ink);
+        overflow: hidden;
+      }
+      dialog.sheet[open] {
+        display: flex;
+        flex-direction: column;
+        animation: rise 0.22s ease-out;
+      }
+      @media (min-width: 700px) {
+        dialog.sheet {
+          margin: auto;
+          border-radius: 10px;
+        }
+      }
+      @keyframes rise {
+        from {
+          transform: translateY(28px);
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        dialog.sheet[open] {
+          animation: none;
+        }
+      }
+      dialog::backdrop {
+        background: rgba(8, 20, 26, 0.55);
+      }
+      .sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px 12px 12px 18px;
+        border-bottom: 1px solid var(--line);
+      }
+      .sheet-head h2 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+      .close {
+        background: none;
+        border: 0;
+        font-size: 1.7rem;
+        line-height: 1;
+        padding: 4px 10px;
+        color: var(--muted);
+      }
+      .sheet-scroll {
+        overflow-y: auto;
+        padding: 0 18px calc(26px + env(safe-area-inset-bottom, 0px));
+      }
+
+      .detail .roof {
+        height: 76px;
+        margin: 0 -18px;
+        font-size: 0.95rem;
+      }
+      .detail-head h2 {
+        margin: 16px 0 6px;
+        font-size: 1.55rem;
+        line-height: 1.15;
+        letter-spacing: -0.015em;
+      }
+      .detail-head p {
+        margin: 4px 0 0;
+      }
+      .small {
+        font-size: 0.88rem;
+      }
+      .row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .row-actions label {
+        font-weight: 600;
+        font-size: 0.88rem;
+      }
+      .row-actions select {
+        display: block;
+        margin-top: 4px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--bg);
+      }
+      .notes {
+        white-space: pre-wrap;
+        background: var(--bg);
+        border-radius: 6px;
+        padding: 12px 14px;
+        margin: 16px 0 0;
+      }
+      .detail section {
+        border-top: 1px solid var(--line);
+        margin-top: 20px;
+        padding-top: 16px;
+      }
+      .detail h3 {
+        margin: 0 0 10px;
+        font-size: 1.08rem;
+      }
+      .vlist {
+        list-style: none;
+        margin: 0 0 12px;
+        padding: 0;
+      }
+      .vlist li {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 4px 12px;
+        padding: 9px 0;
+        border-bottom: 1px dashed var(--line);
+      }
+      .vlist .acts {
+        display: flex;
+        gap: 14px;
+        font-size: 0.9rem;
+      }
+      .linkish {
+        background: none;
+        border: 0;
+        padding: 0;
+        color: var(--vote);
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .avgs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 18px;
+        margin: 0 0 12px;
+        font-size: 0.93rem;
+      }
+      .rating {
+        background: var(--bg);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+      }
+      .rating p {
+        margin: 0;
+      }
+      .rating .cats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 14px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      .rating .comment {
+        margin-top: 6px;
+      }
+      details.edit-rating summary {
+        cursor: pointer;
+        color: var(--harbour);
+        font-weight: 600;
+        margin: 10px 0;
+      }
+
+      /* ---------- forms ---------- */
+      .field {
+        display: block;
+        margin-top: 14px;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .field input,
+      .field textarea {
+        display: block;
+        width: 100%;
+        margin-top: 6px;
+        padding: 11px 12px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 400;
+      }
+      .field-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .checks {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        font-weight: 400;
+        margin-top: 8px;
+      }
+      .checks label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .primary {
+        background: var(--harbour);
+        color: var(--on-harbour);
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 22px;
+        font-weight: 600;
+      }
+      .primary:disabled {
+        opacity: 0.55;
+      }
+      .secondary {
+        background: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-weight: 600;
+      }
+      .secondary.danger {
+        color: var(--vote);
+        border-color: var(--vote);
+      }
+      .end-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 26px;
+      }
+
+      .ac {
+        position: relative;
+      }
+      .ac-list {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        z-index: 5;
+        list-style: none;
+        margin: 4px 0 0;
+        padding: 4px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+      }
+      .ac-list li {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 400;
+      }
+      .ac-list li:hover {
+        background: var(--bg);
+      }
+
+      .stars-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .stars-row > span {
+        font-weight: 600;
+        font-size: 0.93rem;
+      }
+      .stars {
+        display: flex;
+        flex-direction: row-reverse;
+      }
+      .stars input {
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+      }
+      .stars label {
+        font-size: 1.75rem;
+        line-height: 1;
+        padding: 2px 3px;
+        color: var(--line);
+        cursor: pointer;
+      }
+      .stars input:checked ~ label,
+      .stars label:hover,
+      .stars label:hover ~ label {
+        color: var(--gold);
+      }
+      .stars input:focus-visible + label {
+        outline: 3px solid var(--harbour);
+        border-radius: 4px;
+      }
+
+      .picker-list {
+        display: grid;
+        gap: 10px;
+        margin: 18px 0 6px;
+      }
+      .picker-list button {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        text-align: left;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      .toast {
+        position: fixed;
+        inset: auto auto calc(env(safe-area-inset-bottom, 0px) + 144px) 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        z-index: 50;
+        border: 0;
+        background: var(--ink);
+        color: var(--bg);
+        padding: 10px 18px;
+        border-radius: 999px;
+        font-size: 0.93rem;
+        max-width: calc(100% - 36px);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <img
+      class="laa-laa bg-img"
+      src="https://github.com/caitskinz/Rentals/blob/main/Laa-Laa%20copy.png?raw=true"
+    />
+    <img
+      class="dipsy bg-img"
+      src="https://github.com/caitskinz/Rentals/blob/main/dipsy%20copy.png?raw=true"
+    />
+    <img
+      class="tinky-winky bg-img"
+      src="https://github.com/caitskinz/Rentals/blob/main/tinkywinky.png?raw=true"
+    />
+    <img
+      class="po bg-img"
+      src="https://github.com/caitskinz/Rentals/blob/main/PO_footer.png?raw=true"
+    />
+
+    <header class="top">
+      <h1>Flat Hunt</h1>
+      <button class="me" data-action="switch-person" aria-label="Switch person">
+        <span class="dot" id="me-initial">?</span
+        ><span id="me-name">Choose</span>
+      </button>
+    </header>
+    <p id="offline" class="offline" hidden>
+      You're offline, so this is the last sync. Changes can't be saved until you
+      reconnect.
+    </p>
+    <div id="toolbar" class="toolbar"></div>
+    <main id="main"></main>
+
+    <button class="fab" id="fab" data-action="add">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+        <path
+          d="M9 2v14M2 9h14"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linecap="round"
+        />
+      </svg>
+      Add listing
+    </button>
+
+    <nav class="tabs" aria-label="Sections">
+      <button data-action="nav" data-view="listings">Listings</button>
+      <button data-action="nav" data-view="viewings">Viewings</button>
+      <button data-action="nav" data-view="compare">Compare</button>
+    </nav>
+
+    <div id="toast" class="toast" role="status" popover="manual"></div>
+
+    <!-- Listing detail -->
+    <dialog id="detail" class="sheet detail" aria-labelledby="detail-title">
+      <div class="sheet-head">
+        <h2 id="detail-title">Listing</h2>
+        <button class="close" data-action="close" aria-label="Close">×</button>
+      </div>
+      <div class="sheet-scroll" id="detail-body"></div>
+    </dialog>
+
+    <!-- Add / edit listing -->
+    <dialog id="editor" class="sheet" aria-labelledby="editor-title">
+      <div class="sheet-head">
+        <h2 id="editor-title">Add a listing</h2>
+        <button class="close" data-action="close" aria-label="Close">×</button>
+      </div>
+      <div class="sheet-scroll">
+        <form id="listing-form" autocomplete="off">
+          <div class="field ac">
+            <label for="address">Address</label>
+            <input
+              id="address"
+              name="address"
+              required
+              placeholder="Start typing a street address"
+            />
+            <ul id="ac-list" class="ac-list" role="listbox" hidden></ul>
+          </div>
+          <label class="field">Suburb<input id="suburb" name="suburb" /></label>
+          <label class="field"
+            >Listing link<input
+              name="url"
+              type="url"
+              inputmode="url"
+              placeholder="https://www.trademe.co.nz/…"
+          /></label>
+          <div class="field-row">
+            <label class="field"
+              >Rent per week<input
+                name="rent_pw"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                step="5"
+            /></label>
+            <label class="field"
+              >Bedrooms<input
+                name="bedrooms"
+                type="number"
+                inputmode="numeric"
+                min="0"
+            /></label>
+            <label class="field"
+              >Bathrooms<input
+                name="bathrooms"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="0.5"
+            /></label>
+          </div>
+          <label class="field"
+            >Available from<input name="available_date" type="date"
+          /></label>
+          <label class="field"
+            >Notes<textarea
+              name="notes"
+              rows="3"
+              placeholder="Pets negotiable, off-street parking, sent by Grace"
+            ></textarea>
+          </label>
+          <div class="form-actions">
+            <button type="button" class="secondary" data-action="close">
+              Cancel
+            </button>
+            <button type="submit" class="primary" id="editor-submit">
+              Add listing
+            </button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <!-- Who are you -->
+    <dialog id="picker" class="sheet" aria-labelledby="picker-title">
+      <div class="sheet-head">
+        <h2 id="picker-title">Who's using this phone?</h2>
+      </div>
+      <div class="sheet-scroll">
+        <p class="muted">
+          Your votes and ratings are saved under this name. You can switch any
+          time from the top of the screen.
+        </p>
+        <div class="picker-list" id="picker-list"></div>
+      </div>
+    </dialog>
+
+    <script>
+      /* ======== Settings ======== */
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycbzTGWzEofLXSrQ4bo5dJ2I_nSBKqmAC_wkUDGBmuw2vFqI-qbmzmjA4L-g9mkp0fILUZA/exec";
+      const PEOPLE = ["Caitlin", "Grace", "Hannah", "Jasmin"];
+      const TZ = "Pacific/Auckland";
+
+      const CATEGORIES = [
+        ["overall", "Overall"],
+        ["location", "Location"],
+        ["light", "Light and warmth"],
+        ["kitchen", "Kitchen"],
+        ["storage", "Storage"],
+      ];
+      const STATUSES = [
+        ["new", "New"],
+        ["viewing booked", "Viewing booked"],
+        ["viewed", "Viewed"],
+        ["applied", "Applied"],
+        ["rejected", "Ruled out"],
+      ];
+      const FILTERS = [
+        ["active", "All active"],
+        ["shortlist", "Shortlist"],
+        ["to-rate", "To rate"],
+        ["applied", "Applied"],
+        ["rejected", "Ruled out"],
+      ];
+      const SORTS = [
+        ["votes", "Most votes"],
+        ["newest", "Newest"],
+        ["rent", "Cheapest"],
+        ["available", "Available soonest"],
+        ["rating", "Highest rated"],
+      ];
+      const CACHE_KEY = "flathunt:state",
+        ME_KEY = "flathunt:me",
+        VIEW_KEY = "flathunt:ui";
+
+      /* ======== State ======== */
+      const store = {
+        get(k) {
+          try {
+            return localStorage.getItem(k);
+          } catch {
+            return null;
+          }
+        },
+        set(k, v) {
+          try {
+            localStorage.setItem(k, v);
+          } catch {}
+        },
+      };
+      let state = { listings: [], viewings: [], ratings: [], votes: [] };
+      let me = PEOPLE.includes(store.get(ME_KEY)) ? store.get(ME_KEY) : null;
+      const ui = Object.assign(
+        { view: "listings", filter: "active", sort: "votes" },
+        safeParse(store.get(VIEW_KEY)),
+      );
+      ui.openId = null;
+      ui.editingId = null;
+      ui.setupNeeded = !API_URL.startsWith("https://");
+
+      const $ = (s) => document.querySelector(s);
+      function safeParse(s) {
+        try {
+          return JSON.parse(s) || {};
+        } catch {
+          return {};
+        }
+      }
+      const esc = (s) =>
+        String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+
+      /* ======== Data access ======== */
+      async function load() {
+        const cached = safeParse(store.get(CACHE_KEY));
+        if (cached.listings) setState(cached, false);
+        if (ui.setupNeeded) return render();
+        try {
+          const res = await fetch(API_URL);
+          const data = await res.json();
+          if (!data.ok) throw new Error(data.error);
+          setState(data.state);
+          setOffline(false);
+        } catch {
+          setOffline(true);
+        }
+      }
+
+      function setState(s, persist = true) {
+        state = {
+          listings: s.listings || [],
+          viewings: s.viewings || [],
+          ratings: s.ratings || [],
+          votes: s.votes || [],
+        };
+        if (persist) store.set(CACHE_KEY, JSON.stringify(state));
+        render();
+        if (ui.openId) renderDetail();
+      }
+
+      async function send(action, payload = {}, done) {
+        if (ui.setupNeeded) {
+          toast("Add your Apps Script URL to index.html first");
+          return false;
+        }
+        if (!navigator.onLine) {
+          setOffline(true);
+          toast("You're offline. Try again once you reconnect.");
+          return false;
+        }
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids a CORS preflight
+            body: JSON.stringify({ action, person: me, ...payload }),
+          });
+          const data = await res.json();
+          if (!data.ok) throw new Error(data.error || "Save failed");
+          setState(data.state);
+          setOffline(false);
+          if (done) toast(done);
+          return true;
+        } catch (e) {
+          toast(`Couldn't save: ${e.message}`);
+          load();
+          return false;
+        }
+      }
+
+      /* ======== Selectors ======== */
+      const listingById = (id) => state.listings.find((l) => l.id === id);
+      const votesFor = (id) =>
+        state.votes.filter((v) => v.listing_id === id).map((v) => v.person);
+      const ratingsFor = (id) =>
+        state.ratings.filter((r) => r.listing_id === id);
+      const myRating = (id) =>
+        state.ratings.find((r) => r.listing_id === id && r.person === me);
+      const viewingsFor = (id) =>
+        state.viewings
+          .filter((v) => v.listing_id === id)
+          .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+      const isUpcoming = (v) =>
+        new Date(v.datetime).getTime() > Date.now() - 60 * 60000;
+      const nextViewing = (id) => viewingsFor(id).find(isUpcoming);
+      const statusOf = (l) => l.status || "new";
+      const statusLabel = (s) =>
+        (STATUSES.find((x) => x[0] === s) || [s, "New"])[1];
+      function avg(id, cat = "overall") {
+        const xs = ratingsFor(id)
+          .map((r) => Number(r[cat]))
+          .filter((n) => n > 0);
+        return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+      }
+      function paint(id) {
+        let h = 0;
+        for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+        return `var(--p${h % 6})`;
+      }
+
+      /* ======== Formatting (always NZ time) ======== */
+      const fmt = (opts) =>
+        new Intl.DateTimeFormat("en-NZ", { timeZone: TZ, ...opts });
+      const fDateTime = fmt({
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      const fDay = fmt({ weekday: "short", day: "numeric", month: "short" });
+      const fDayLong = fmt({ weekday: "long", day: "numeric", month: "long" });
+      const fTime = fmt({ hour: "numeric", minute: "2-digit" });
+      const fIsoDay = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }); // YYYY-MM-DD
+
+      function toDate(v) {
+        if (!v) return null;
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+        const d = m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : new Date(v); // UTC midnight is midday in NZ
+        return isNaN(d) ? null : d;
+      }
+      const show = (f, v) => {
+        const d = toDate(v);
+        return d ? f.format(d) : "";
+      };
+      const money = (v) =>
+        v ? `$${Number(v).toLocaleString("en-NZ")} pw` : "";
+      const safeUrl = (u) => (/^https?:\/\//i.test(u) ? u : "https://" + u);
+
+      function calendarLink(v, l) {
+        const start = new Date(v.datetime),
+          end = new Date(start.getTime() + 30 * 60000);
+        const f = (d) =>
+          d
+            .toISOString()
+            .replace(/[-:]/g, "")
+            .replace(/\.\d{3}/, "");
+        const q = new URLSearchParams({
+          action: "TEMPLATE",
+          text: `Viewing: ${l.address}`,
+          dates: `${f(start)}/${f(end)}`,
+          location: [l.address, l.suburb, "Wellington"]
+            .filter(Boolean)
+            .join(", "),
+          details: l.url || "",
+        });
+        return `https://calendar.google.com/calendar/render?${q}`;
+      }
+
+      /* ======== Rendering ======== */
+      function render() {
+        $("#me-name").textContent = me || "Choose";
+        $("#me-initial").textContent = me ? me[0] : "?";
+        document
+          .querySelectorAll(".tabs button")
+          .forEach((b) =>
+            b.setAttribute(
+              "aria-current",
+              b.dataset.view === ui.view ? "page" : "false",
+            ),
+          );
+        $("#fab").hidden = ui.view !== "listings";
+        renderToolbar();
+        const main = $("#main");
+        if (ui.setupNeeded) {
+          main.innerHTML = `<p class="empty">Almost there. Paste your Apps Script web app URL into <code>API_URL</code> near the bottom of index.html, then reload.</p>`;
+          return;
+        }
+        main.innerHTML =
+          ui.view === "viewings"
+            ? renderViewings()
+            : ui.view === "compare"
+              ? renderCompare()
+              : renderListings();
+      }
+
+      function renderToolbar() {
+        const bar = $("#toolbar");
+        bar.hidden = ui.view !== "listings";
+        if (bar.hidden) return;
+        bar.innerHTML =
+          FILTERS.map(
+            ([k, label]) =>
+              `<button class="chip" data-action="filter" data-filter="${k}" aria-pressed="${ui.filter === k}">${label}</button>`,
+          ).join("") +
+          `<label class="sr" for="sort">Sort by</label><select id="sort" class="sort">${SORTS.map(
+            ([k, label]) =>
+              `<option value="${k}" ${ui.sort === k ? "selected" : ""}>${label}</option>`,
+          ).join("")}</select>`;
+      }
+
+      const SORTERS = {
+        newest: (a, b) => String(b.added_at).localeCompare(String(a.added_at)),
+        votes: (a, b) =>
+          votesFor(b.id).length - votesFor(a.id).length || SORTERS.newest(a, b),
+        rent: (a, b) => (Number(a.rent_pw) || 1e9) - (Number(b.rent_pw) || 1e9),
+        available: (a, b) =>
+          (a.available_date || "9999").localeCompare(
+            b.available_date || "9999",
+          ),
+        rating: (a, b) =>
+          (avg(b.id) ?? -1) - (avg(a.id) ?? -1) || SORTERS.votes(a, b),
+      };
+
+      function filteredListings() {
+        return state.listings
+          .filter((l) => {
+            const s = statusOf(l);
+            switch (ui.filter) {
+              case "active":
+                return s !== "rejected";
+              case "shortlist":
+                return s !== "rejected" && votesFor(l.id).length >= 2;
+              case "to-rate": {
+                const seen =
+                  ["viewed", "applied"].includes(s) ||
+                  viewingsFor(l.id).some((v) => !isUpcoming(v));
+                return s !== "rejected" && seen && !myRating(l.id);
+              }
+              default:
+                return s === ui.filter;
+            }
+          })
+          .sort(SORTERS[ui.sort] || SORTERS.votes);
+      }
+
+      const EMPTY = {
+        active: "No listings yet. Add the first place someone sent round.",
+        shortlist:
+          "Nothing has two votes yet. Upvote the places you could see yourself living in.",
+        "to-rate":
+          "You're all caught up. Places you've viewed show up here until you rate them.",
+        applied: "No applications yet.",
+        rejected: "Nothing ruled out so far.",
+      };
+
+      function renderListings() {
+        const ls = filteredListings();
+        if (!ls.length) return `<p class="empty">${EMPTY[ui.filter]}</p>`;
+        return `<div class="grid">${ls.map(card).join("")}</div>`;
+      }
+
+      function facts(l) {
+        return [
+          money(l.rent_pw),
+          l.bedrooms && `${l.bedrooms} bed`,
+          l.bathrooms && `${l.bathrooms} bath`,
+          l.available_date && `From ${show(fDay, l.available_date)}`,
+        ]
+          .filter(Boolean)
+          .map((x) => `<span>${esc(x)}</span>`)
+          .join("");
+      }
+
+      function voteControl(id) {
+        const voters = votesFor(id),
+          mine = voters.includes(me);
+        return `<div class="voting">
+    <span class="voters" aria-label="${esc(voters.length ? "Upvoted by " + voters.join(", ") : "No votes yet")}">
+      ${PEOPLE.map((p) => `<span class="dot${voters.includes(p) ? " on" : ""}" title="${esc(p)}" aria-hidden="true">${esc(p[0])}</span>`).join("")}
+    </span>
+    <button class="vote" data-action="vote" data-id="${esc(id)}" aria-pressed="${mine}">${mine ? "Upvoted" : "Upvote"}</button>
+  </div>`;
+      }
+
+      function scoreText(id) {
+        const a = avg(id),
+          n = ratingsFor(id).length;
+        return a != null
+          ? `<span class="star" aria-hidden="true">★</span> ${a.toFixed(1)} <span class="muted">from ${n}</span>`
+          : `<span class="muted">Not rated yet</span>`;
+      }
+
+      function card(l) {
+        const nv = nextViewing(l.id);
+        return `<article class="house" style="--paint:${paint(l.id)}">
+    <button class="house-open" data-action="open" data-id="${esc(l.id)}">
+      <div class="roof" aria-hidden="true"><span>${esc(l.suburb)}</span></div>
+      <div class="house-body">
+        <h3>${esc(l.address)}</h3>
+        <p class="facts">${facts(l)}</p>
+        <p class="status"><span class="pill" data-status="${esc(statusOf(l))}">${esc(statusLabel(statusOf(l)))}</span>
+          ${nv ? `<span>Viewing ${esc(show(fDateTime, nv.datetime))}</span>` : ""}</p>
+      </div>
+    </button>
+    <div class="house-foot"><span>${scoreText(l.id)}</span>${voteControl(l.id)}</div>
+  </article>`;
+      }
+
+      function renderViewings() {
+        const all = state.viewings
+          .map((v) => ({ v, l: listingById(v.listing_id) }))
+          .filter((x) => x.l)
+          .sort((a, b) => new Date(a.v.datetime) - new Date(b.v.datetime));
+        const upcoming = all.filter((x) => isUpcoming(x.v)),
+          past = all.filter((x) => !isUpcoming(x.v)).reverse();
+        if (!all.length)
+          return `<p class="empty">No viewings booked. Open a listing to add one.</p>`;
+
+        const row = (
+          { v, l },
+          past,
+        ) => `<div class="viewing" style="--paint:${paint(l.id)}">
+    <span class="time${past ? " small" : ""}">${esc(show(past ? fDay : fTime, v.datetime))}</span>
+    <button class="addr" data-action="open" data-id="${esc(l.id)}">${esc(l.address)}</button>
+    <span class="sub">${esc([l.suburb, v.attendees && `Going: ${v.attendees}`].filter(Boolean).join(". "))}</span>
+    <span class="links">${past ? "" : `<a href="${esc(calendarLink(v, l))}" target="_blank" rel="noopener">Add to Google Calendar</a>`}${l.url ? `<a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">See listing</a>` : ""}</span>
+  </div>`;
+
+        const groups = {};
+        upcoming.forEach((x) => {
+          const k = show(fDayLong, x.v.datetime);
+          (groups[k] = groups[k] || []).push(x);
+        });
+        let html = upcoming.length
+          ? Object.entries(groups)
+              .map(
+                ([day, xs]) =>
+                  `<section class="day"><h2>${esc(day)}</h2>${xs.map((x) => row(x)).join("")}</section>`,
+              )
+              .join("")
+          : `<p class="empty">No upcoming viewings.</p>`;
+        if (past.length)
+          html += `<section class="day past"><h2>Already seen</h2>${past.map((x) => row(x, true)).join("")}</section>`;
+        return html;
+      }
+
+      function renderCompare() {
+        const ls = state.listings
+          .filter((l) => statusOf(l) !== "rejected")
+          .sort(SORTERS.votes)
+          .slice(0, 10);
+        if (ls.length < 2)
+          return `<p class="empty">Add at least two listings to compare them side by side.</p>`;
+        const cols = [
+          {
+            label: "Votes",
+            get: (l) => votesFor(l.id).length,
+            best: "max",
+            show: (v) => v,
+          },
+          {
+            label: "Rent",
+            get: (l) => Number(l.rent_pw) || null,
+            best: "min",
+            show: (v) => (v ? `$${v}` : ""),
+          },
+          {
+            label: "Beds",
+            get: (l) => Number(l.bedrooms) || null,
+            best: "max",
+            show: (v) => v ?? "",
+          },
+          ...CATEGORIES.map(([k, label]) => ({
+            label,
+            get: (l) => avg(l.id, k),
+            best: "max",
+            show: (v) => (v != null ? v.toFixed(1) : ""),
+          })),
+        ];
+        const bests = cols.map((c) => {
+          const vals = ls.map(c.get).filter((v) => v != null && v !== 0);
+          return vals.length
+            ? c.best === "max"
+              ? Math.max(...vals)
+              : Math.min(...vals)
+            : null;
+        });
+        return `<p class="lede">Your top places, most votes first. The best value in each column is highlighted.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Place</th>${cols.map((c) => `<th scope="col">${c.label}</th>`).join("")}</tr></thead>
+    <tbody>${ls
+      .map(
+        (l) => `<tr>
+      <th scope="row"><button class="place-btn" style="--paint:${paint(l.id)}" data-action="open" data-id="${esc(l.id)}">${esc(l.address)}</button></th>
+      ${cols
+        .map((c, i) => {
+          const v = c.get(l);
+          return `<td class="${v != null && v === bests[i] ? "best" : ""}">${esc(c.show(v))}</td>`;
+        })
+        .join("")}
+    </tr>`,
+      )
+      .join("")}</tbody>
+  </table></div>`;
+      }
+
+      function starsInput(key, label, value, required) {
+        return `<div class="stars-row" role="radiogroup" aria-labelledby="lbl-${key}">
+    <span id="lbl-${key}">${label}</span>
+    <div class="stars">${[5, 4, 3, 2, 1]
+      .map(
+        (n) => `
+      <input type="radio" id="r-${key}-${n}" name="${key}" value="${n}" ${Number(value) === n ? "checked" : ""} ${required ? "required" : ""}>
+      <label for="r-${key}-${n}" aria-label="${n} of 5">★</label>`,
+      )
+      .join("")}</div>
+  </div>`;
+      }
+
+      function ratingForm(r) {
+        return `<form id="rating-form">
+    ${CATEGORIES.map(([k, label]) => starsInput(k, label, r?.[k], k === "overall")).join("")}
+    <label class="field">Comment<textarea name="comment" rows="2" placeholder="Great light, tiny second bedroom">${esc(r?.comment)}</textarea></label>
+    <div class="form-actions"><button class="primary" type="submit">Save rating</button></div>
+  </form>`;
+      }
+
+      function ratingCard(r) {
+        const cats = CATEGORIES.slice(1)
+          .filter(([k]) => r[k])
+          .map(([k, label]) => `<span>${label} ${esc(r[k])}</span>`)
+          .join("");
+        return `<div class="rating">
+    <p><strong>${esc(r.person === me ? "You" : r.person)}</strong> <span class="star" aria-hidden="true">★</span> ${esc(r.overall)}</p>
+    ${cats ? `<p class="cats">${cats}</p>` : ""}
+    ${r.comment ? `<p class="comment">${esc(r.comment)}</p>` : ""}
+  </div>`;
+      }
+
+      function renderRatings(l) {
+        const all = ratingsFor(l.id),
+          mine = myRating(l.id);
+        if (!mine) {
+          const others = all.map((r) => r.person);
+          const note = others.length
+            ? `${others.join(" and ")} rated this already. Add yours to see their scores.`
+            : "No one has rated this yet.";
+          return `<p class="muted small">${esc(note)}</p>${ratingForm(null)}`;
+        }
+        const avgs = CATEGORIES.map(([k, label]) => {
+          const a = avg(l.id, k);
+          return a != null
+            ? `<span>${label} <strong>${a.toFixed(1)}</strong></span>`
+            : "";
+        }).join("");
+        return `<p class="avgs">${avgs}</p>${all.map(ratingCard).join("")}
+    <details class="edit-rating"><summary>Change my rating</summary>${ratingForm(mine)}</details>`;
+      }
+
+      function renderDetail() {
+        const l = listingById(ui.openId);
+        const dlg = $("#detail");
+        if (!l) {
+          if (dlg.open) dlg.close();
+          return;
+        }
+        const wasOpen = dlg.querySelector("details.edit-rating")?.open;
+        const vs = viewingsFor(l.id);
+        $("#detail-title").textContent = l.suburb || "Listing";
+        $("#detail-body").innerHTML = `
+    <div class="roof" style="--paint:${paint(l.id)}" aria-hidden="true"></div>
+    <div class="detail-head">
+      <h2>${esc(l.address)}</h2>
+      <p class="facts">${facts(l)}</p>
+      <p class="muted small">Added by ${esc(l.added_by)} on ${esc(show(fDay, l.added_at))}</p>
+      ${l.url ? `<p><a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">Open the listing</a></p>` : ""}
+    </div>
+    <div class="row-actions">
+      <label>Status<select data-action="status">${STATUSES.map(([k, label]) => `<option value="${k}" ${statusOf(l) === k ? "selected" : ""}>${label}</option>`).join("")}</select></label>
+      ${voteControl(l.id)}
+    </div>
+    ${l.notes ? `<p class="notes">${esc(l.notes)}</p>` : ""}
+
+    <section>
+      <h3>Viewings</h3>
+      ${
+        vs.length
+          ? `<ul class="vlist">${vs
+              .map(
+                (v) => `<li>
+        <span><strong>${esc(show(fDateTime, v.datetime))}</strong>${v.attendees ? `<span class="muted"> with ${esc(v.attendees)}</span>` : ""}</span>
+        <span class="acts">${isUpcoming(v) ? `<a href="${esc(calendarLink(v, l))}" target="_blank" rel="noopener">Add to calendar</a>` : ""}
+        <button class="linkish" data-action="delete-viewing" data-id="${esc(v.id)}">Remove</button></span>
+      </li>`,
+              )
+              .join("")}</ul>`
+          : ""
+      }
+      <form id="viewing-form">
+        <label class="field">Date and time<input type="datetime-local" name="datetime" required></label>
+        <div class="field">Who's going<div class="checks">${PEOPLE.map((p) => `<label><input type="checkbox" name="attendees" value="${esc(p)}" ${p === me ? "checked" : ""}> ${esc(p)}</label>`).join("")}</div></div>
+        <div class="form-actions"><button class="secondary" type="submit">Add viewing</button></div>
+      </form>
+    </section>
+
+    <section>
+      <h3>Ratings</h3>
+      ${renderRatings(l)}
+    </section>
+
+    <div class="end-actions">
+      <button class="secondary" data-action="edit">Edit details</button>
+      <button class="secondary danger" data-action="delete">Delete listing</button>
+    </div>`;
+        if (wasOpen)
+          dlg.querySelector("details.edit-rating")?.setAttribute("open", "");
+      }
+
+      /* ======== Actions ======== */
+      function openDetail(id) {
+        ui.openId = id;
+        renderDetail();
+        const dlg = $("#detail");
+        if (!dlg.open) dlg.showModal();
+        $("#detail .sheet-scroll").scrollTop = 0;
+      }
+
+      function openEditor(id) {
+        ui.editingId = id;
+        const l = id ? listingById(id) : {};
+        const f = $("#listing-form");
+        f.reset();
+        [
+          "address",
+          "suburb",
+          "url",
+          "rent_pw",
+          "bedrooms",
+          "bathrooms",
+          "notes",
+        ].forEach((k) => {
+          f.elements[k].value = l[k] ?? "";
+        });
+        const d = toDate(l.available_date);
+        f.elements.available_date.value = d ? fIsoDay.format(d) : "";
+        $("#editor-title").textContent = id ? "Edit listing" : "Add a listing";
+        $("#editor-submit").textContent = id ? "Save changes" : "Add listing";
+        $("#editor").showModal();
+      }
+
+      function openPicker() {
+        $("#picker-list").innerHTML = PEOPLE.map(
+          (p) =>
+            `<button data-action="pick" data-person="${esc(p)}"><span class="dot">${esc(p[0])}</span>${esc(p)}</button>`,
+        ).join("");
+        $("#picker").showModal();
+      }
+
+      async function toggleVote(id) {
+        if (!navigator.onLine || ui.setupNeeded)
+          return send("toggleVote", { id });
+        const i = state.votes.findIndex(
+          (v) => v.listing_id === id && v.person === me,
+        );
+        if (i >= 0) state.votes.splice(i, 1);
+        else
+          state.votes.push({
+            listing_id: id,
+            person: me,
+            voted_at: new Date().toISOString(),
+          });
+        render();
+        if (ui.openId) renderDetail();
+        await send("toggleVote", { id });
+      }
+
+      async function deleteListing(id) {
+        const l = listingById(id);
+        if (
+          !l ||
+          !confirm(
+            `Delete ${l.address}? Its viewings, votes and ratings go too.`,
+          )
+        )
+          return;
+        if (await send("deleteListing", { id }, "Listing deleted")) {
+          ui.openId = null;
+          $("#detail").close();
+        }
+      }
+
+      function saveUi() {
+        store.set(
+          VIEW_KEY,
+          JSON.stringify({ view: ui.view, filter: ui.filter, sort: ui.sort }),
+        );
+      }
+
+      document.addEventListener("click", (e) => {
+        const t = e.target.closest("[data-action]");
+        if (!t) return;
+        const id = t.dataset.id;
+        switch (t.dataset.action) {
+          case "open":
+            openDetail(id);
+            break;
+          case "vote":
+            toggleVote(id);
+            break;
+          case "nav":
+            ui.view = t.dataset.view;
+            saveUi();
+            render();
+            window.scrollTo(0, 0);
+            break;
+          case "filter":
+            ui.filter = t.dataset.filter;
+            saveUi();
+            render();
+            break;
+          case "add":
+            openEditor(null);
+            break;
+          case "edit":
+            openEditor(ui.openId);
+            break;
+          case "delete":
+            deleteListing(ui.openId);
+            break;
+          case "delete-viewing":
+            send("deleteViewing", { viewingId: id }, "Viewing removed");
+            break;
+          case "switch-person":
+            openPicker();
+            break;
+          case "pick":
+            me = t.dataset.person;
+            store.set(ME_KEY, me);
+            $("#picker").close();
+            render();
+            if (ui.openId) renderDetail();
+            break;
+          case "close":
+            t.closest("dialog").close();
+            break;
+        }
+      });
+
+      document.addEventListener("change", (e) => {
+        if (e.target.id === "sort") {
+          ui.sort = e.target.value;
+          saveUi();
+          render();
+        }
+        if (e.target.matches('select[data-action="status"]')) {
+          send(
+            "updateListing",
+            { id: ui.openId, listing: { status: e.target.value } },
+            "Status updated",
+          );
+        }
+      });
+
+      document.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const f = e.target,
+          btn = f.querySelector('[type="submit"]');
+        if (btn) btn.disabled = true;
+        try {
+          if (f.id === "listing-form") {
+            const listing = Object.fromEntries(new FormData(f));
+            const ok = ui.editingId
+              ? await send(
+                  "updateListing",
+                  { id: ui.editingId, listing },
+                  "Changes saved",
+                )
+              : await send("addListing", { listing }, "Listing added");
+            if (ok) $("#editor").close();
+          } else if (f.id === "viewing-form") {
+            const fd = new FormData(f);
+            const local = new Date(fd.get("datetime")); // read as the phone's local time
+            await send(
+              "addViewing",
+              {
+                id: ui.openId,
+                datetime: local.toISOString(),
+                attendees: fd.getAll("attendees"),
+              },
+              "Viewing added",
+            );
+          } else if (f.id === "rating-form") {
+            await send(
+              "rate",
+              { id: ui.openId, rating: Object.fromEntries(new FormData(f)) },
+              "Rating saved",
+            );
+          }
+        } finally {
+          if (btn && btn.isConnected) btn.disabled = false;
+        }
+      });
+
+      $("#detail").addEventListener("close", () => {
+        ui.openId = null;
+      });
+      $("#picker").addEventListener("cancel", (e) => {
+        if (!me) e.preventDefault();
+      });
+
+      /* ======== Address autocomplete (Nominatim, biased to Wellington) ======== */
+      const addr = $("#address"),
+        acList = $("#ac-list");
+      let acTimer,
+        acCtrl,
+        acResults = [];
+      addr.addEventListener("input", () => {
+        clearTimeout(acTimer);
+        const q = addr.value.trim();
+        if (q.length < 4) {
+          acList.hidden = true;
+          return;
+        }
+        acTimer = setTimeout(async () => {
+          try {
+            acCtrl?.abort();
+            acCtrl = new AbortController();
+            const url =
+              "https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=nz&limit=5" +
+              "&viewbox=174.60,-41.05,175.15,-41.40&q=" +
+              encodeURIComponent(q);
+            const results = await (
+              await fetch(url, { signal: acCtrl.signal })
+            ).json();
+            acResults = results.map((r) => {
+              const a = r.address || {};
+              return {
+                street:
+                  [a.house_number, a.road].filter(Boolean).join(" ") ||
+                  r.display_name.split(",")[0],
+                suburb:
+                  a.suburb ||
+                  a.city_district ||
+                  a.neighbourhood ||
+                  a.town ||
+                  a.city ||
+                  "",
+              };
+            });
+            acList.innerHTML = acResults
+              .map(
+                (r, i) =>
+                  `<li role="option" data-i="${i}">${esc(r.street)}<span class="muted">${esc(r.suburb)}</span></li>`,
+              )
+              .join("");
+            acList.hidden = !acResults.length;
+          } catch {}
+        }, 600);
+      });
+      acList.addEventListener("pointerdown", (e) => {
+        const li = e.target.closest("li");
+        if (!li) return;
+        e.preventDefault();
+        const r = acResults[li.dataset.i];
+        addr.value = r.street;
+        $("#suburb").value = r.suburb;
+        acList.hidden = true;
+      });
+      addr.addEventListener("blur", () =>
+        setTimeout(() => {
+          acList.hidden = true;
+        }, 150),
+      );
+
+      /* ======== Toast, offline, refresh ======== */
+      const toastEl = $("#toast");
+      const hasPopover = "showPopover" in HTMLElement.prototype;
+      if (!hasPopover) toastEl.hidden = true;
+      let toastTimer;
+      function toast(msg) {
+        toastEl.textContent = msg;
+        // A popover sits above open dialogs; older browsers fall back to a plain element
+        if (hasPopover) {
+          if (toastEl.matches(":popover-open")) toastEl.hidePopover();
+          toastEl.showPopover();
+        } else toastEl.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          hasPopover ? toastEl.hidePopover() : (toastEl.hidden = true);
+        }, 2600);
+      }
+      function setOffline(b) {
+        $("#offline").hidden = !b;
+      }
+      window.addEventListener("online", load);
+      window.addEventListener("offline", () => setOffline(true));
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") load();
+      });
+
+      /* ======== Start ======== */
+      render();
+      load();
+      if (!me) openPicker();
+      if ("serviceWorker" in navigator)
+        navigator.serviceWorker.register("./sw.js");
+    </script>
+  </body>
+</html>
