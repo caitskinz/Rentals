@@ -1511,24 +1511,19 @@
       }
 
       function renderRatings(l) {
-        const all = ratingsFor(l.id),
-          mine = myRating(l.id);
-        if (!mine) {
-          const others = all.map((r) => r.person);
-          const note = others.length
-            ? `${others.join(" and ")} rated this already. Add yours to see their scores.`
-            : "No one has rated this yet.";
-          return `<p class="muted small">${esc(note)}</p>${ratingForm(null)}`;
-        }
-        const avgs = CATEGORIES.map(([k, label]) => {
-          const a = avg(l.id, k);
-          return a != null
-            ? `<span>${label} <strong>${a.toFixed(1)}</strong></span>`
-            : "";
-        }).join("");
-        return `<p class="avgs">${avgs}</p>${all.map(ratingCard).join("")}
-    <details class="edit-rating"><summary>Change my rating</summary>${ratingForm(mine)}</details>`;
-      }
+  const all = ratingsFor(l.id),
+    mine = myRating(l.id);
+  if (!all.length)
+    return `<p class="muted small">No one has rated this yet.</p>${ratingForm(null)}`;
+  const avgs = CATEGORIES.map(([k, label]) => {
+    const a = avg(l.id, k);
+    return a != null
+      ? `<span>${label} <strong>${a.toFixed(1)}</strong></span>`
+      : "";
+  }).join("");
+  return `<p class="avgs">${avgs}</p>${all.map(ratingCard).join("")}
+    <details class="edit-rating"><summary>${mine ? "Change my rating" : "Add my rating"}</summary>${ratingForm(mine)}</details>`;
+}
 
       function renderDetail() {
         const l = listingById(ui.openId);
