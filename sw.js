@@ -1,5 +1,5 @@
 // Bump this whenever you push changes, so phones pick up the new version
-const VERSION = 'flathunt-v1';
+const VERSION = 'flathunt-v2';
 const SHELL = [
   './', './index.html', './manifest.json',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
